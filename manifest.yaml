@@ -1,6 +1,6 @@
 manifestVersion: 1
 name: "@keeb/twilio"
-version: "2026.03.03.1"
+version: "2026.04.06.1"
 description: "Twilio SMS/MMS messaging and phone number management"
 repository: https://github.com/keeb/swamp-twilio
 labels:
@@ -11,3 +11,5 @@ labels:
 models:
   - messaging.ts
   - phone_numbers.ts
+skills:
+  - twilio
