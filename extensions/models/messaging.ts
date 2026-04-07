@@ -40,12 +40,19 @@ export const model = {
       description: "Send an SMS or MMS message",
       arguments: z.object({
         to: z.string().describe("Destination phone number (E.164 format)"),
-        from: z.string().describe("Twilio phone number to send from (E.164 format)"),
+        from: z.string().describe(
+          "Twilio phone number to send from (E.164 format)",
+        ),
         body: z.string().describe("Message body text"),
-        mediaUrl: z.string().url().optional().describe("URL of media to attach (MMS)"),
+        mediaUrl: z.string().url().optional().describe(
+          "URL of media to attach (MMS)",
+        ),
       }),
       execute: async (args, context) => {
-        const client = new Twilio(context.globalArgs.accountSid, context.globalArgs.authToken);
+        const client = new Twilio(
+          context.globalArgs.accountSid,
+          context.globalArgs.authToken,
+        );
 
         const createParams = {
           to: args.to,
@@ -56,7 +63,10 @@ export const model = {
           createParams.mediaUrl = [args.mediaUrl];
         }
 
-        context.logger.info("Sending message to {to} from {from}", { to: args.to, from: args.from });
+        context.logger.info("Sending message to {to} from {from}", {
+          to: args.to,
+          from: args.from,
+        });
         const message = await client.messages.create(createParams);
 
         const handle = await context.writeResource("message", message.sid, {
@@ -72,8 +82,12 @@ export const model = {
           price: message.price,
           priceUnit: message.priceUnit,
           uri: message.uri,
-          dateCreated: message.dateCreated ? message.dateCreated.toISOString() : null,
-          dateUpdated: message.dateUpdated ? message.dateUpdated.toISOString() : null,
+          dateCreated: message.dateCreated
+            ? message.dateCreated.toISOString()
+            : null,
+          dateUpdated: message.dateUpdated
+            ? message.dateUpdated.toISOString()
+            : null,
         });
         return { dataHandles: [handle] };
       },
@@ -84,7 +98,10 @@ export const model = {
         messageSid: z.string().describe("Message SID (starts with SM)"),
       }),
       execute: async (args, context) => {
-        const client = new Twilio(context.globalArgs.accountSid, context.globalArgs.authToken);
+        const client = new Twilio(
+          context.globalArgs.accountSid,
+          context.globalArgs.authToken,
+        );
 
         context.logger.info("Fetching message {sid}", { sid: args.messageSid });
         const message = await client.messages(args.messageSid).fetch();
@@ -104,8 +121,12 @@ export const model = {
           errorCode: message.errorCode,
           errorMessage: message.errorMessage,
           uri: message.uri,
-          dateCreated: message.dateCreated ? message.dateCreated.toISOString() : null,
-          dateUpdated: message.dateUpdated ? message.dateUpdated.toISOString() : null,
+          dateCreated: message.dateCreated
+            ? message.dateCreated.toISOString()
+            : null,
+          dateUpdated: message.dateUpdated
+            ? message.dateUpdated.toISOString()
+            : null,
         });
         return { dataHandles: [handle] };
       },
@@ -115,22 +136,39 @@ export const model = {
       arguments: z.object({
         to: z.string().optional().describe("Filter by destination number"),
         from: z.string().optional().describe("Filter by sender number"),
-        dateSent: z.string().optional().describe("Filter by exact date sent (YYYY-MM-DD)"),
-        dateSentAfter: z.string().optional().describe("Messages sent after this date (YYYY-MM-DD)"),
-        dateSentBefore: z.string().optional().describe("Messages sent before this date (YYYY-MM-DD)"),
-        pageSize: z.number().default(20).describe("Number of messages to return"),
+        dateSent: z.string().optional().describe(
+          "Filter by exact date sent (YYYY-MM-DD)",
+        ),
+        dateSentAfter: z.string().optional().describe(
+          "Messages sent after this date (YYYY-MM-DD)",
+        ),
+        dateSentBefore: z.string().optional().describe(
+          "Messages sent before this date (YYYY-MM-DD)",
+        ),
+        pageSize: z.number().default(20).describe(
+          "Number of messages to return",
+        ),
       }),
       execute: async (args, context) => {
-        const client = new Twilio(context.globalArgs.accountSid, context.globalArgs.authToken);
+        const client = new Twilio(
+          context.globalArgs.accountSid,
+          context.globalArgs.authToken,
+        );
 
         const listParams = { limit: args.pageSize };
         if (args.to) listParams.to = args.to;
         if (args.from) listParams.from = args.from;
         if (args.dateSent) listParams.dateSent = new Date(args.dateSent);
-        if (args.dateSentAfter) listParams.dateSentAfter = new Date(args.dateSentAfter);
-        if (args.dateSentBefore) listParams.dateSentBefore = new Date(args.dateSentBefore);
+        if (args.dateSentAfter) {
+          listParams.dateSentAfter = new Date(args.dateSentAfter);
+        }
+        if (args.dateSentBefore) {
+          listParams.dateSentBefore = new Date(args.dateSentBefore);
+        }
 
-        context.logger.info("Listing messages with filters {filters}", { filters: JSON.stringify(listParams) });
+        context.logger.info("Listing messages with filters {filters}", {
+          filters: JSON.stringify(listParams),
+        });
         const messages = await client.messages.list(listParams);
 
         const handle = await context.writeResource("messageList", "latest", {
